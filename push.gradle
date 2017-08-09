@@ -19,3 +19,4 @@ android {
         applicationId = doExtractStringFromManifest("package")
     }
 }
+
