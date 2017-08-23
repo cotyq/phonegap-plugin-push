@@ -35,7 +35,12 @@
       <permission android:name="${applicationId}.permission.PushHandlerActivity" android:protectionLevel="signature"/>
     </config-file>
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
-      <activity android:name="com.adobe.phonegap.push.PushHandlerActivity" android:exported="true" android:permission="${applicationId}.permission.PushHandlerActivity"/>
+      <activity android:name="com.adobe.phonegap.push.PushHandlerActivity" android:exported="true" android:permission="${applicationId}.permission.PushHandlerActivity">
+          <intent-filter>
+              <action android:name="FCM_PLUGIN_ACTIVITY" />
+              <category android:name="android.intent.category.DEFAULT" />
+          </intent-filter>
+      </activity>
       <receiver android:name="com.adobe.phonegap.push.BackgroundActionButtonHandler"/>
       <receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
         <intent-filter>
