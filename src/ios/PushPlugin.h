@@ -26,10 +26,12 @@
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPlugin.h>
+#import <UserNotifications/UserNotifications.h>
 
 @protocol GGLInstanceIDDelegate;
 @protocol GCMReceiverDelegate;
-@interface PushPlugin : CDVPlugin<GGLInstanceIDDelegate, GCMReceiverDelegate>
+@interface PushPlugin : CDVPlugin<GGLInstanceIDDelegate, GCMReceiverDelegate, UNUserNotificationCenterDelegate>
+
 {
     NSDictionary *notificationMessage;
     BOOL    isInline;
@@ -67,6 +69,7 @@
 - (void)willSendDataMessageWithID:(NSString *)messageID error:(NSError *)error;
 - (void)didSendDataMessageWithID:(NSString *)messageID;
 - (void)didDeleteMessagesOnServer;
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
 
 //  GCM Features
 @property(nonatomic, assign) BOOL usesGCM;

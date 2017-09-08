@@ -61,6 +61,7 @@ static char coldstartKey;
                                             selector:@selector(pushPluginOnApplicationDidBecomeActive:)
                                                 name:UIApplicationDidBecomeActiveNotification
                                               object:nil];
+    [[UNUserNotificationCenter currentNotificationCenter]setDelegate:[self getCommandInstance:@"PushNotification"]];
 
     // This actually calls the original init method over in AppDelegate. Equivilent to calling super
     // on an overrided method, this is not recursive, although it appears that way. neat huh?

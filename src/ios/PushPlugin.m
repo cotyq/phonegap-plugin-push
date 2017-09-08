@@ -674,4 +674,13 @@
     }
 }
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+        willPresentNotification:(UNNotification *)notification
+        withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
+   // Update the app interface directly.
+ 
+    // Play a sound.
+   completionHandler(UNNotificationPresentationOptionAlert);
+}
+
 @end
