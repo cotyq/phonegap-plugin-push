@@ -85,6 +85,11 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                 PushPlugin.setApplicationIconBadgeNumber(getApplicationContext(), 0);
             }
 
+            int notId = parseInt(NOT_ID, extras);
+            ArrayList<String> messageList = messageMap.get(notId);
+            int messageCount = (messageList == null) ? 0 : messageList.size();
+            extras.putInt(MSG_COUNT, messageCount);
+
             // if we are in the foreground and forceShow is `false` only send data
             if (!forceShow && PushPlugin.isInForeground()) {
                 Log.d(LOG_TAG, "foreground");
@@ -468,6 +473,7 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                     boolean inline = action.optBoolean("inline", false);
                     Intent intent = null;
                     PendingIntent pIntent = null;
+
                     if (inline) {
                         Log.d(LOG_TAG, "Version: " + android.os.Build.VERSION.SDK_INT + " = " + android.os.Build.VERSION_CODES.M);
                         if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.M) {
