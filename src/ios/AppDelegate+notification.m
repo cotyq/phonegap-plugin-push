@@ -61,7 +61,7 @@ static char coldstartKey;
                                             selector:@selector(pushPluginOnApplicationDidBecomeActive:)
                                                 name:UIApplicationDidBecomeActiveNotification
                                               object:nil];
-    [[UNUserNotificationCenter currentNotificationCenter]setDelegate:[self getCommandInstance:@"PushNotification"]];
+    [[UNUserNotificationCenter currentNotificationCenter]setDelegate:self];
 
     // This actually calls the original init method over in AppDelegate. Equivilent to calling super
     // on an overrided method, this is not recursive, although it appears that way. neat huh?
@@ -246,6 +246,15 @@ forRemoteNotification: (NSDictionary *) notification completionHandler: (void (^
 
         [pushHandler performSelectorOnMainThread:@selector(notificationReceived) withObject:pushHandler waitUntilDone:NO];
     }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+        willPresentNotification:(UNNotification *)notification
+        withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
+    NSLog(@"userNotificationCenter willPresentNotification");
+
+    PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
+    [pushHandler userNotificationCenter:center willPresentNotification:notification withCompletionHandler:completionHandler];
 }
 
 // The accessors use an Associative Reference since you can't define a iVar in a category
