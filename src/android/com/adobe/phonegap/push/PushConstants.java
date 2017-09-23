@@ -35,6 +35,7 @@ public interface PushConstants {
     public static final String PRIORITY = "priority";
     public static final String IMAGE = "image";
     public static final String STYLE_INBOX = "inbox";
+    public static final String STYLE_MESSAGING = "messaging";
     public static final String STYLE_PICTURE = "picture";
     public static final String STYLE_TEXT = "text";
     public static final String BADGE = "badge";

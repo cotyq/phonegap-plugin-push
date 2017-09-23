@@ -43,19 +43,29 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
 
     private static final String LOG_TAG = "PushPlugin_GCMIntentService";
     private static HashMap<Integer, ArrayList<String>> messageMap = new HashMap<Integer, ArrayList<String>>();
+    private static HashMap<Integer, ArrayList<String>> titleMap = new HashMap<Integer, ArrayList<String>>();
 
-    public void setNotification(int notId, String message){
+    public void setNotification(int notId, String message, String title){
         ArrayList<String> messageList = messageMap.get(notId);
+        ArrayList<String> titleList = titleMap.get(notId);
         if(messageList == null) {
             messageList = new ArrayList<String>();
+            titleList = new ArrayList<String>();
             messageMap.put(notId, messageList);
+            titleMap.put(notId, titleList);
         }
 
         if(message.isEmpty()){
             messageList.clear();
+            titleList.clear();
         }else{
             messageList.add(message);
+            titleList.add(title);
         }
+    }
+
+    public void setNotification(int notId, String message){
+        setNotification(notId, message, "");
     }
 
     @Override
@@ -567,14 +577,16 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
 
     private void setNotificationMessage(int notId, Bundle extras, NotificationCompat.Builder mBuilder) {
         String message = extras.getString(MESSAGE);
+        String title = extras.getString(TITLE);
 
         String style = extras.getString(STYLE, STYLE_TEXT);
-        if(STYLE_INBOX.equals(style)) {
-            setNotification(notId, message);
+        if(STYLE_INBOX.equals(style) || STYLE_MESSAGING.equals(style)) {
+            setNotification(notId, message, title);
 
             mBuilder.setContentText(fromHtml(message));
 
             ArrayList<String> messageList = messageMap.get(notId);
+            ArrayList<String> titleList = titleMap.get(notId);
             Integer sizeList = messageList.size();
             if (sizeList > 1) {
                 String sizeListMessage = sizeList.toString();
@@ -583,15 +595,25 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                     stacking = extras.getString(SUMMARY_TEXT);
                     stacking = stacking.replace("%n%", sizeListMessage);
                 }
-                NotificationCompat.InboxStyle notificationInbox = new NotificationCompat.InboxStyle()
+                if(STYLE_INBOX.equals(style)) {
+                    NotificationCompat.InboxStyle notificationInbox = new NotificationCompat.InboxStyle()
                         .setBigContentTitle(fromHtml(extras.getString(TITLE)))
                         .setSummaryText(fromHtml(stacking));
 
-                for (int i = messageList.size() - 1; i >= 0; i--) {
-                    notificationInbox.addLine(fromHtml(messageList.get(i)));
-                }
+                    for (int i = messageList.size() - 1; i >= 0; i--) {
+                        notificationInbox.addLine(fromHtml(messageList.get(i)));
+                    }
 
-                mBuilder.setStyle(notificationInbox);
+                    mBuilder.setStyle(notificationInbox);
+                } else {
+                    NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("")
+                        .setConversationTitle(fromHtml(stacking));
+
+                    for (int i = messageList.size() - 1; i >= 0; i--) {
+                        messagingStyle.addMessage(fromHtml(messageList.get(i)), 0, fromHtml(titleList.get(i)));
+                    }
+                    mBuilder.setStyle(messagingStyle);
+                }
             } else {
                 NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                 if (message != null) {
@@ -601,7 +623,7 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                 }
             }
         } else if (STYLE_PICTURE.equals(style)) {
-            setNotification(notId, "");
+            setNotification(notId, "", "");
 
             NotificationCompat.BigPictureStyle bigPicture = new NotificationCompat.BigPictureStyle();
             bigPicture.bigPicture(getBitmapFromURL(extras.getString(PICTURE)));
@@ -613,7 +635,7 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
 
             mBuilder.setStyle(bigPicture);
         } else {
-            setNotification(notId, "");
+            setNotification(notId, "", "");
 
             NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
 
