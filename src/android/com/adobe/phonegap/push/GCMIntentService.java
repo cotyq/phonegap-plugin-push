@@ -609,8 +609,10 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                     NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("")
                         .setConversationTitle(fromHtml(stacking));
 
+                    String separator = (extras.getString(SEPARATOR) == null) ? "" : extras.getString(SEPARATOR);
+
                     for (int i = messageList.size() - 1; i >= 0; i--) {
-                        messagingStyle.addMessage(fromHtml(messageList.get(i)), 0, fromHtml(titleList.get(i)));
+                        messagingStyle.addMessage(fromHtml(messageList.get(i)), 0, fromHtml(titleList.get(i).concat(separator)));
                     }
                     mBuilder.setStyle(messagingStyle);
                 } else {
