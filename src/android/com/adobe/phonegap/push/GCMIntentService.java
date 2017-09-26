@@ -611,7 +611,7 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                     }
 
                     mBuilder.setStyle(notificationInbox);
-                } else {
+                } else if(android.os.Build.VERSION.SDK_INT >= 24){
                     NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("")
                         .setConversationTitle(fromHtml(stacking));
 
@@ -621,6 +621,17 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
                         messagingStyle.addMessage(fromHtml(messageList.get(i)), 0, fromHtml(titleList.get(i).concat(separator)));
                     }
                     mBuilder.setStyle(messagingStyle);
+                } else {
+                    NotificationCompat.InboxStyle notificationInbox = new NotificationCompat.InboxStyle()
+                        .setBigContentTitle(fromHtml(extras.getString(TITLE)))
+                        .setSummaryText(fromHtml(stacking));
+
+                    String separator = (extras.getString(SEPARATOR) == null) ? "" : extras.getString(SEPARATOR);
+                    for (int i = messageList.size() - 1; i >= 0; i--) {
+                        notificationInbox.addLine(fromHtml(titleList.get(i)) + separator + " " + fromHtml(messageList.get(i)));
+                    }
+
+                    mBuilder.setStyle(notificationInbox);
                 }
             } else {
                 NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
