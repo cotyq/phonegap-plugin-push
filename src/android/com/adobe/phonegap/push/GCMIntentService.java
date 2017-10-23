@@ -68,6 +68,11 @@ public class GCMIntentService extends GcmListenerService implements PushConstant
         setNotification(notId, message, "");
     }
 
+    public static void clearAllNotifications() {
+        messageMap.clear();
+        titleMap.clear();
+    }
+
     @Override
     public void onMessageReceived(String from, Bundle extras) {
         Log.d(LOG_TAG, "onMessage - from: " + from);
