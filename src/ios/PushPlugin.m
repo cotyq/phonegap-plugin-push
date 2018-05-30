@@ -590,6 +590,8 @@
 - (void)clearAllNotifications:(CDVInvokedUrlCommand *)command
 {
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 
     NSString* message = [NSString stringWithFormat:@"cleared all notifications"];
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
