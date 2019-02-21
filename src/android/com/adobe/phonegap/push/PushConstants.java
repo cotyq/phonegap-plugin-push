@@ -37,6 +37,7 @@ public interface PushConstants {
   public static final String PRIORITY = "priority";
   public static final String IMAGE = "image";
   public static final String STYLE_INBOX = "inbox";
+  public static final String STYLE_MESSAGING = "messaging";
   public static final String STYLE_PICTURE = "picture";
   public static final String STYLE_TEXT = "text";
   public static final String BADGE = "badge";
@@ -98,4 +99,6 @@ public interface PushConstants {
   public static final String DELETE_CHANNEL = "deleteChannel";
   public static final String ONGOING = "ongoing";
   public static final String LIST_CHANNELS = "listChannels";
+  public static final String MSG_COUNT = "messageCount";
+  public static final String SEPARATOR = "separator";
 }

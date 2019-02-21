@@ -146,7 +146,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
       final NotificationManager notificationManager = (NotificationManager) cordova.getActivity()
           .getSystemService(Context.NOTIFICATION_SERVICE);
       List<NotificationChannel> channels = notificationManager.getNotificationChannels();
-      
+
       for (int i=0; i<channels.size(); i++ ) {
         id = channels.get(i).getId();
         if (id.equals(DEFAULT_CHANNEL_ID)) {
@@ -570,6 +570,8 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
           additionalData.put(key, extras.getBoolean(FOREGROUND));
         } else if (key.equals(DISMISSED)) {
           additionalData.put(key, extras.getBoolean(DISMISSED));
+        } else if (key.equals(MSG_COUNT)) {
+          additionalData.put(key, extras.getInt(MSG_COUNT));
         } else if (value instanceof String) {
           String strValue = (String) value;
           try {

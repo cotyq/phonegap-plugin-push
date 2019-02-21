@@ -53,19 +53,31 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
 
   private static final String LOG_TAG = "Push_FCMService";
   private static HashMap<Integer, ArrayList<String>> messageMap = new HashMap<Integer, ArrayList<String>>();
+  private static HashMap<Integer, ArrayList<String>> titleMap = new HashMap<Integer, ArrayList<String>>();
 
-  public void setNotification(int notId, String message) {
+  public void setNotification(int notId, String message, String title) {
     ArrayList<String> messageList = messageMap.get(notId);
+    ArrayList<String> titleList = titleMap.get(notId);
+
     if (messageList == null) {
       messageList = new ArrayList<String>();
+      titleList = new ArrayList<String>();
+
       messageMap.put(notId, messageList);
+      titleMap.put(notId, titleList);
     }
 
     if (message.isEmpty()) {
       messageList.clear();
+      titleList.clear();
     } else {
       messageList.add(message);
+      titleList.add(title);
     }
+  }
+
+  public void setNotification(int notId, String message) {
+    setNotification(notId, message, "");
   }
 
   @Override
@@ -102,6 +114,12 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
       if (clearBadge) {
         PushPlugin.setApplicationIconBadgeNumber(getApplicationContext(), 0);
       }
+
+      int notId = parseInt(NOT_ID, extras);
+      Log.d(LOG_TAG, "notId " + notId);
+      ArrayList<String> messageList = messageMap.get(notId);
+      int messageCount = (messageList == null) ? 0 : messageList.size();
+      extras.putInt(MSG_COUNT, messageCount);
 
       // if we are in the foreground and forceShow is `false` only send data
       if (!forceShow && PushPlugin.isInForeground()) {
@@ -650,13 +668,15 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
 
   private void setNotificationMessage(int notId, Bundle extras, NotificationCompat.Builder mBuilder) {
     String message = extras.getString(MESSAGE);
+    String title = extras.getString(TITLE);
     String style = extras.getString(STYLE, STYLE_TEXT);
-    if (STYLE_INBOX.equals(style)) {
-      setNotification(notId, message);
+    if(STYLE_INBOX.equals(style) || STYLE_MESSAGING.equals(style)) {
+      setNotification(notId, message, title);
 
       mBuilder.setContentText(fromHtml(message));
 
       ArrayList<String> messageList = messageMap.get(notId);
+      ArrayList<String> titleList = titleMap.get(notId);
       Integer sizeList = messageList.size();
       if (sizeList > 1) {
         String sizeListMessage = sizeList.toString();
@@ -665,14 +685,37 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
           stacking = extras.getString(SUMMARY_TEXT);
           stacking = stacking.replace("%n%", sizeListMessage);
         }
-        NotificationCompat.InboxStyle notificationInbox = new NotificationCompat.InboxStyle()
+        if(STYLE_INBOX.equals(style)) {
+          NotificationCompat.InboxStyle notificationInbox = new NotificationCompat.InboxStyle()
             .setBigContentTitle(fromHtml(extras.getString(TITLE))).setSummaryText(fromHtml(stacking));
 
-        for (int i = messageList.size() - 1; i >= 0; i--) {
-          notificationInbox.addLine(fromHtml(messageList.get(i)));
-        }
+          for (int i = messageList.size() - 1; i >= 0; i--) {
+            notificationInbox.addLine(fromHtml(messageList.get(i)));
+          }
 
-        mBuilder.setStyle(notificationInbox);
+          mBuilder.setStyle(notificationInbox);
+        } else if(android.os.Build.VERSION.SDK_INT >= 24) {
+          NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("")
+            .setConversationTitle(fromHtml(stacking));
+
+          String separator = (extras.getString(SEPARATOR) == null) ? "" : extras.getString(SEPARATOR);
+
+          for (int i = messageList.size() - 1; i >= 0; i--) {
+            messagingStyle.addMessage(fromHtml(messageList.get(i)), 0, fromHtml(titleList.get(i).concat(separator)));
+          }
+          mBuilder.setStyle(messagingStyle);
+        } else {
+          NotificationCompat.InboxStyle notificationInbox = new NotificationCompat.InboxStyle()
+            .setBigContentTitle(fromHtml(extras.getString(TITLE)))
+            .setSummaryText(fromHtml(stacking));
+
+          String separator = (extras.getString(SEPARATOR) == null) ? "" : extras.getString(SEPARATOR);
+          for (int i = messageList.size() - 1; i >= 0; i--) {
+            notificationInbox.addLine(fromHtml(titleList.get(i)) + separator + " " + fromHtml(messageList.get(i)));
+          }
+
+          mBuilder.setStyle(notificationInbox);
+        }
       } else {
         NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
         if (message != null) {
